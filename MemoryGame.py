@@ -1,14 +1,25 @@
-import random, pygame, sys
+
+# Memory Puzzle
+# By Al Sweigart al@inventwithpython.com
+# http://inventwithpython.com/pygame
+# Released under a "Simplified BSD" license
+
+import random, pygame, sys, configparser, os
 from pygame.locals import *
 
-FPS = 30 # frames per second, the general speed of the program
-WINDOWWIDTH = 640 # size of window's width in pixels
-WINDOWHEIGHT = 480 # size of windows' height in pixels
-REVEALSPEED = 8 # speed boxes' sliding reveals and covers
-BOXSIZE = 40 # size of box height & width in pixels
-GAPSIZE = 10 # size of gap between boxes in pixels
-BOARDWIDTH = 4 # number of columns of icons
-BOARDHEIGHT = 5 # number of rows of icons
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+
+FPS = int(config['GameSettings']['FPS']) # frames per second, the general speed of the program
+WINDOWWIDTH = int(config['GameSettings']['WINDOWWIDTH']) # size of window's width in pixels
+WINDOWHEIGHT = int(config['GameSettings']['WINDOWHEIGHT']) # size of windows' height in pixels
+REVEALSPEED = int(config['GameSettings']['REVEALSPEED']) # speed boxes' sliding reveals and covers
+BOXSIZE = int(config['GameSize']['BOXSIZE']) # size of box height & width in pixels
+GAPSIZE = int(config['GameSize']['GAPSIZE']) # size of gap between boxes in pixels
+BOARDWIDTH = int(config['GameSize']['BOARDWIDTH']) # number of columns of icons
+BOARDHEIGHT = int(config['GameSize']['BOARDHEIGHT']) # number of rows of icons
+
 assert (BOARDWIDTH * BOARDHEIGHT) % 2 == 0, 'Board needs to have an even number of boxes for pairs of matches.'
 XMARGIN = int((WINDOWWIDTH - (BOARDWIDTH * (BOXSIZE + GAPSIZE))) / 2)
 YMARGIN = int((WINDOWHEIGHT - (BOARDHEIGHT * (BOXSIZE + GAPSIZE))) / 2)
@@ -40,11 +51,14 @@ ALLCOLORS = (RED, GREEN, BLUE, YELLOW, ORANGE, PURPLE, CYAN)
 ALLSHAPES = (DONUT, SQUARE, DIAMOND, LINES, OVAL)
 assert len(ALLCOLORS) * len(ALLSHAPES) * 2 >= BOARDWIDTH * BOARDHEIGHT, "Board is too big for the number of shapes/colors defined."
 
+
+global FPSCLOCK, DISPLAYSURF
+pygame.init()
+FPSCLOCK = pygame.time.Clock()
+DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+
 def main():
-    global FPSCLOCK, DISPLAYSURF
-    pygame.init()
-    FPSCLOCK = pygame.time.Clock()
-    DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+
 
     mousex = 0 # used to store x coordinate of mouse event
     mousey = 0 # used to store y coordinate of mouse event
