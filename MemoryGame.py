@@ -55,7 +55,8 @@ FPSCLOCK = pygame.time.Clock()
 DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
 
 def main():
-
+    global turnCount
+    turnCount = 0
     mousex = 0 # used to store x coordinate of mouse event
     mousey = 0 # used to store y coordinate of mouse event
     pygame.display.set_caption('Memory Game')
@@ -98,6 +99,7 @@ def main():
                     # Check if there is a match between the two icons.
                     icon1shape, icon1color = getShapeAndColor(mainBoard, firstSelection[0], firstSelection[1])
                     icon2shape, icon2color = getShapeAndColor(mainBoard, boxx, boxy)
+                    turnCount = turnCount + 1
 
                     if icon1shape != icon2shape or icon1color != icon2color:
                         # Icons don't match. Re-cover up both selections.
@@ -291,7 +293,6 @@ def hasWon(revealedBoxes):
         if False in i:
             return False # return False if any boxes are covered.
     return True
-
 
 if __name__ == '__main__':
     main()
