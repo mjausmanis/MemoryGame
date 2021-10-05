@@ -1,3 +1,4 @@
+
 # Memory Puzzle
 # By Al Sweigart al@inventwithpython.com
 # http://inventwithpython.com/pygame
@@ -18,6 +19,7 @@ BOXSIZE = int(config['GameSize']['BOXSIZE']) # size of box height & width in pix
 GAPSIZE = int(config['GameSize']['GAPSIZE']) # size of gap between boxes in pixels
 BOARDWIDTH = int(config['GameSize']['BOARDWIDTH']) # number of columns of icons
 BOARDHEIGHT = int(config['GameSize']['BOARDHEIGHT']) # number of rows of icons
+
 assert (BOARDWIDTH * BOARDHEIGHT) % 2 == 0, 'Board needs to have an even number of boxes for pairs of matches.'
 XMARGIN = int((WINDOWWIDTH - (BOARDWIDTH * (BOXSIZE + GAPSIZE))) / 2)
 YMARGIN = int((WINDOWHEIGHT - (BOARDHEIGHT * (BOXSIZE + GAPSIZE))) / 2)
@@ -49,12 +51,14 @@ ALLCOLORS = (RED, GREEN, BLUE, YELLOW, ORANGE, PURPLE, CYAN)
 ALLSHAPES = (DONUT, SQUARE, DIAMOND, LINES, OVAL)
 assert len(ALLCOLORS) * len(ALLSHAPES) * 2 >= BOARDWIDTH * BOARDHEIGHT, "Board is too big for the number of shapes/colors defined."
 
+
 global FPSCLOCK, DISPLAYSURF
 pygame.init()
 FPSCLOCK = pygame.time.Clock()
 DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
 
 def main():
+
 
     mousex = 0 # used to store x coordinate of mouse event
     mousey = 0 # used to store y coordinate of mouse event

@@ -1,7 +1,7 @@
 Memory game
 
-Šajā projektā izstrādāta atmiņas spēle, kurā jāatrod kāršu pāri no daudzām paslēptām kārtīm.
-Spēle norisināsies grafiskā vidē, kurā būs izkārtots laukums ar noteiktu skaitu kārtīm.
-Kārts vērtība/attēls sākumā nav redzams, bet uz tām nospiežot vērtība/attēls parādas. 
-Viena gājiena laikā jāizvēlas 2 kārtis. Vienādas kārtis kļūst redzamas, ne-vienādas paliek aizvērtas.
-Spēles mērķis ir atrast visus kāršu pārus.
+Šajā projektā izstrādāta atmiņas spēle, kurā jāatrod attēlu pāri no daudziem paslēptiem attēliem.
+Spēle norisināsies grafiskā vidē, kurā būs izkārtots laukums ar noteiktu skaitu attēliem.
+Attēls sākumā nav redzams, bet uz tiem nospiežot tas parādas. 
+Viena gājiena laikā jāizvēlas 2 attēli. Vienādi attēli kļūst redzami, ne-vienādi paliek aizvērti.
+Spēles mērķis ir atrast visus attēlu pārus.
