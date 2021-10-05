@@ -4,12 +4,22 @@
 # http://inventwithpython.com/pygame
 # Released under a "Simplified BSD" license
 
-import random, pygame, sys, configparser, os
+import random, pygame, sys, configparser, os, logging.config, logging, yaml
 from pygame.locals import *
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+with open('./logconfig.yaml', 'r') as stream:
+    logConfig = yaml.safe_load(stream)
+
+logging.config.dictConfig(logConfig)
+
+logger = logging.getLogger('root')
+
+logging.info('Starting memory game')
+
+logger.info('Loading game config from file')
 
 FPS = int(config['GameSettings']['FPS']) # frames per second, the general speed of the program
 WINDOWWIDTH = int(config['GameSettings']['WINDOWWIDTH']) # size of window's width in pixels
@@ -20,7 +30,7 @@ GAPSIZE = int(config['GameSize']['GAPSIZE']) # size of gap between boxes in pixe
 BOARDWIDTH = int(config['GameSize']['BOARDWIDTH']) # number of columns of icons
 BOARDHEIGHT = int(config['GameSize']['BOARDHEIGHT']) # number of rows of icons
 
-assert (BOARDWIDTH * BOARDHEIGHT) % 2 == 0, 'Board needs to have an even number of boxes for pairs of matches.'
+assert (BOARDWIDTH * BOARDHEIGHT) % 2 == 0, logger.error('Board needs to have an even number of boxes for pairs of matches.')
 XMARGIN = int((WINDOWWIDTH - (BOARDWIDTH * (BOXSIZE + GAPSIZE))) / 2)
 YMARGIN = int((WINDOWHEIGHT - (BOARDHEIGHT * (BOXSIZE + GAPSIZE))) / 2)
 
@@ -49,7 +59,7 @@ OVAL = 'oval'
 
 ALLCOLORS = (RED, GREEN, BLUE, YELLOW, ORANGE, PURPLE, CYAN)
 ALLSHAPES = (DONUT, SQUARE, DIAMOND, LINES, OVAL)
-assert len(ALLCOLORS) * len(ALLSHAPES) * 2 >= BOARDWIDTH * BOARDHEIGHT, "Board is too big for the number of shapes/colors defined."
+assert len(ALLCOLORS) * len(ALLSHAPES) * 2 >= BOARDWIDTH * BOARDHEIGHT, logger.error('Board is too big for the amount of colors')
 
 
 global FPSCLOCK, DISPLAYSURF
@@ -74,7 +84,6 @@ def main():
 
     while True: # main game loop
         mouseClicked = False
-
         DISPLAYSURF.fill(BGCOLOR) # drawing the window
         drawBoard(mainBoard, revealedBoxes)
 
@@ -87,7 +96,6 @@ def main():
             elif event.type == MOUSEBUTTONUP:
                 mousex, mousey = event.pos
                 mouseClicked = True
-
         boxx, boxy = getBoxAtPixel(mousex, mousey)
         if boxx != None and boxy != None:
             # The mouse is currently over a box.
@@ -100,19 +108,25 @@ def main():
                     firstSelection = (boxx, boxy)
                 else: # the current box was the second box clicked
                     # Check if there is a match between the two icons.
+                    logger.info('Picked a pair of boxes')
                     icon1shape, icon1color = getShapeAndColor(mainBoard, firstSelection[0], firstSelection[1])
                     icon2shape, icon2color = getShapeAndColor(mainBoard, boxx, boxy)
-                    turnCount = turnCount + 1
-
+                    turnCount = turnCount + 1 #Adds count to the amount of turns taken
                     if icon1shape != icon2shape or icon1color != icon2color:
                         # Icons don't match. Re-cover up both selections.
+                        logger.info('Chosen shapes do not match')
                         pygame.time.wait(1000) # 1000 milliseconds = 1 sec
                         coverBoxesAnimation(mainBoard, [(firstSelection[0], firstSelection[1]), (boxx, boxy)])
                         revealedBoxes[firstSelection[0]][firstSelection[1]] = False
                         revealedBoxes[boxx][boxy] = False
-                    elif hasWon(revealedBoxes): # check if all pairs found
+                    else:
+                        logger.info('Found matching shapes')
+                    if hasWon(revealedBoxes): # check if all pairs found
+                        logger.info('Game has finished')
                         gameWonAnimation(mainBoard)
                         pygame.time.wait(2000)
+                        logger.info('Turns taken in this game:' + str(turnCount))
+                        turnCount = 0 #Resets turn counter before next game
 
                         # Reset the board
                         mainBoard = getRandomizedBoard()
