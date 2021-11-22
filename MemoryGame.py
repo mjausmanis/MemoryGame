@@ -1,14 +1,17 @@
-
 # Memory Puzzle
 # By Al Sweigart al@inventwithpython.com
 # http://inventwithpython.com/pygame
 # Released under a "Simplified BSD" license
 
-import random, pygame, sys, configparser, os, logging.config, logging, yaml
+import random, pygame, sys, configparser, os, logging.config, logging, yaml, mysql.connector, datetime, time
+from pygame.version import rev
+from mysql.connector import Error
 from pygame.locals import *
+from datetime import datetime
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+if(os.path.exists('./logfile.log') == False):
+    open('logfile.log', 'a+')
 
 with open('./logconfig.yaml', 'r') as stream:
     logConfig = yaml.safe_load(stream)
@@ -17,9 +20,52 @@ logging.config.dictConfig(logConfig)
 
 logger = logging.getLogger('root')
 
-logging.info('Starting memory game')
+logger.info('Loading configurations from file')
+try:
+    config.read('config.ini')
+    DbConfig_db_host  = config.get('DbConfig', 'db_host')
+    DbConfig_db = config.get('DbConfig', 'db')
+    DbConfig_db_user = config.get('DbConfig', 'db_user')
+    DbConfig_db_pass = config.get('DbConfig', 'db_pass')
+except:
+    logger.error('Configuration loading failed')
+logger.info('Done')
 
-logger.info('Loading game config from file')
+connection = None
+connected = False
+
+def init_db():
+    global connection
+    connection = mysql.connector.connect(host=DbConfig_db_host, database=DbConfig_db, user=DbConfig_db_user, password=DbConfig_db_pass)
+
+logger.info('Connecting to database')
+init_db()
+
+def get_cursor():
+	global connection
+	try:
+		connection.ping(reconnect=True, attempts=1, delay=0)
+		connection.commit()
+	except mysql.connector.Error as err:
+		logger.error("No connection to db " + str(err))
+		connection = init_db()
+		connection.commit()
+	return connection.cursor()
+
+try:
+	cursor = get_cursor()
+	if connection.is_connected():
+		db_Info = connection.get_server_info()
+		logger.info('Connected to database.')
+		cursor = connection.cursor()
+		cursor.execute("select database();")
+		record = cursor.fetchone()
+		logger.debug('You\'re connected to - ' + str(record))
+		connection.commit()
+except Error as e :
+	logger.error('Error while connecting to database' + str(e))
+
+logger.info('Starting memory game')
 
 FPS = int(config['GameSettings']['FPS']) # frames per second, the general speed of the program
 WINDOWWIDTH = int(config['GameSettings']['WINDOWWIDTH']) # size of window's width in pixels
@@ -68,7 +114,7 @@ FPSCLOCK = pygame.time.Clock()
 DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
 
 def main():
-    global turnCount
+    startTime = datetime.now().strftime('%H:%M:%S')
     turnCount = 0
     mousex = 0 # used to store x coordinate of mouse event
     mousey = 0 # used to store y coordinate of mouse event
@@ -122,10 +168,17 @@ def main():
                     else:
                         logger.info('Found matching shapes')
                     if hasWon(revealedBoxes): # check if all pairs found
+                        endTime = datetime.now().strftime('%H:%M:%S')
                         logger.info('Game has finished')
                         gameWonAnimation(mainBoard)
                         pygame.time.wait(2000)
-                        logger.info('Turns taken in this game:' + str(turnCount))
+                        logger.info('Turns taken in this game: ' + str(turnCount))
+                        gridSize = str(BOARDWIDTH)+' x '+str(BOARDHEIGHT)
+                        print(gridSize)
+                        dbInsert = "INSERT INTO scores (gridSize, turnCount, startTime, endTime) VALUES (%s, %s, %s, %s)"
+                        values = (gridSize, turnCount, startTime, endTime)
+                        cursor.execute(dbInsert, values)
+                        connection.commit()
                         turnCount = 0 #Resets turn counter before next game
 
                         # Reset the board
