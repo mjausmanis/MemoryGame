@@ -1,6 +1,6 @@
 import logging
 import logging.config
-import MySQLdb
+import mysql
 import yaml
 import os
 import time
@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 from configparser import ConfigParser
-from MySQLdb import Error
+from mysql import Error
 
 # Loading logging configuration
 with open('./logconfig.yaml', 'r') as stream:
@@ -41,7 +41,7 @@ connected = False
 def init_db():
 	global connection
 	try:
-	    connection = MySQLdb.connect(host=DbConfig_db_host, database=DbConfig_db, user=DbConfig_db_user, password=DbConfig_db_pass)
+	    connection = mysql.connector.connect(host=DbConfig_db_host, database=DbConfig_db, user=DbConfig_db_user, password=DbConfig_db_pass)
 	except:
 		logger.error('Could not connect to database')
 logger.info('Connecting to database')
@@ -52,7 +52,7 @@ def get_cursor():
 	try:
 		connection.ping(reconnect=True, attempts=1, delay=0)
 		connection.commit()
-	except MySQLdb.connector.Error as err:
+	except mysql.connector.Error as err:
 		logger.error("No connection to db " + str(err))
 		connection = init_db()
 		connection.commit()
