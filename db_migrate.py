@@ -1,6 +1,6 @@
 import logging
 import logging.config
-import MySQLdb
+import mysql
 import yaml
 import os
 import time
@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 from configparser import ConfigParser
-from MySQLdb import Error
+from mysql import Error
 
 # Loading logging configuration
 with open('./logconfig.yaml', 'r') as stream:
