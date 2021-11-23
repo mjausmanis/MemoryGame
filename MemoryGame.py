@@ -9,10 +9,12 @@ from mysql.connector import Error
 from pygame.locals import *
 from datetime import datetime
 
+#Checks if log file exists, if not creates one.
 config = configparser.ConfigParser()
 if(os.path.exists('./logfile.log') == False):
     open('logfile.log', 'a+')
 
+#Loads logging configuration.
 with open('./logconfig.yaml', 'r') as stream:
     logConfig = yaml.safe_load(stream)
 
@@ -20,6 +22,7 @@ logging.config.dictConfig(logConfig)
 
 logger = logging.getLogger('root')
 
+#Loads database configuration from config file.
 logger.info('Loading configurations from file')
 try:
     config.read('config.ini')
@@ -34,6 +37,7 @@ logger.info('Done')
 connection = None
 connected = False
 
+#Method used to connect to the database.
 def init_db():
     global connection
     connection = mysql.connector.connect(host=DbConfig_db_host, database=DbConfig_db, user=DbConfig_db_user, password=DbConfig_db_pass)
@@ -41,6 +45,7 @@ def init_db():
 logger.info('Connecting to database')
 init_db()
 
+#Method for getting the cursor to use for databases. Checks if database is connected.
 def get_cursor():
 	global connection
 	try:
@@ -114,8 +119,8 @@ FPSCLOCK = pygame.time.Clock()
 DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
 
 def main():
-    startTime = datetime.now().strftime('%H:%M:%S')
-    turnCount = 0
+    startTime = datetime.now().strftime('%H:%M:%S') # start time of game
+    turnCount = 0 # used to count turns taken in game.
     mousex = 0 # used to store x coordinate of mouse event
     mousey = 0 # used to store y coordinate of mouse event
     pygame.display.set_caption('Memory Game')
@@ -168,13 +173,14 @@ def main():
                     else:
                         logger.info('Found matching shapes')
                     if hasWon(revealedBoxes): # check if all pairs found
-                        endTime = datetime.now().strftime('%H:%M:%S')
+                        endTime = datetime.now().strftime('%H:%M:%S') # end time of game
                         logger.info('Game has finished')
                         gameWonAnimation(mainBoard)
                         pygame.time.wait(2000)
                         logger.info('Turns taken in this game: ' + str(turnCount))
                         gridSize = str(BOARDWIDTH)+' x '+str(BOARDHEIGHT)
                         print(gridSize)
+                        # inserts into the databse the size of the grid, turns taken and start and end time.
                         dbInsert = "INSERT INTO scores (gridSize, turnCount, startTime, endTime) VALUES (%s, %s, %s, %s)"
                         values = (gridSize, turnCount, startTime, endTime)
                         cursor.execute(dbInsert, values)
